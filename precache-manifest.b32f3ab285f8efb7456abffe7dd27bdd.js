@@ -1,31 +1,27 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "83007655538c515d243ad76ff6fce6d3",
+    "revision": "cc47913fda97fc58a3ca083300b7cc6a",
     "url": "/baucuatomca/index.html"
   },
   {
-    "revision": "f3fc5e7baaf0be3aae5a",
-    "url": "/baucuatomca/static/css/2.334dfab6.chunk.css"
+    "revision": "0f042acfeb56fe76508b",
+    "url": "/baucuatomca/static/css/2.034d33df.chunk.css"
   },
   {
-    "revision": "aece92b882b801bc12a1",
-    "url": "/baucuatomca/static/css/main.b2b558c9.chunk.css"
+    "revision": "0feae38f479699069c97",
+    "url": "/baucuatomca/static/css/main.31d98ca7.chunk.css"
   },
   {
-    "revision": "f3fc5e7baaf0be3aae5a",
-    "url": "/baucuatomca/static/js/2.81cfe0d7.chunk.js"
+    "revision": "0f042acfeb56fe76508b",
+    "url": "/baucuatomca/static/js/2.4525d79a.chunk.js"
   },
   {
-    "revision": "c64c486544348f10a6d6c716950bc223",
-    "url": "/baucuatomca/static/js/2.81cfe0d7.chunk.js.LICENSE.txt"
+    "revision": "0feae38f479699069c97",
+    "url": "/baucuatomca/static/js/main.29eb53e8.chunk.js"
   },
   {
-    "revision": "aece92b882b801bc12a1",
-    "url": "/baucuatomca/static/js/main.a5dd2475.chunk.js"
-  },
-  {
-    "revision": "e1dd404c65c10e44b66a",
-    "url": "/baucuatomca/static/js/runtime-main.834a664c.js"
+    "revision": "27809ac13e9e67990242",
+    "url": "/baucuatomca/static/js/runtime~main.3ea2ebb9.js"
   },
   {
     "revision": "674f50d287a8c48dc19ba404d20fe713",
