@@ -77,7 +77,7 @@ class App extends Component {
         <span className="sr-only">Loading...</span>
       </div>
     ) : (
-        <Router>
+        <Router basename={process.env.PUBLIC_URL}>
           <Switch>
             <Route exact path="/" component={Home} />
             <PrivateRoute
