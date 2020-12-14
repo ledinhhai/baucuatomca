@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import {
+  HashRouter,
   Route,
   BrowserRouter as Router,
   Switch,
@@ -79,7 +80,7 @@ class App extends Component {
         <span className="sr-only">Loading...</span>
       </div>
     ) : (
-        <Router basename={process.env.PUBLIC_URL}>
+      <HashRouter basename={process.env.PUBLIC_URL}>
           <Switch>
             <Route exact path="/" component={Home}  basename={process.env.PUBLIC_URL}/>
             <PrivateRoute
@@ -110,7 +111,7 @@ class App extends Component {
               component={Login}
             />
           </Switch>
-        </Router>
+        </HashRouter>
       );
   }
 }
