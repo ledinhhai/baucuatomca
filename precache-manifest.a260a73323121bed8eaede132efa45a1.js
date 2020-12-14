@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "360921fd1209378ca3c7e9afbad951dc",
+    "revision": "94d4c5ec7e1f2054f3aa73b6e0039e93",
     "url": "/baucuatomca/index.html"
   },
   {
@@ -8,15 +8,15 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/baucuatomca/static/css/2.034d33df.chunk.css"
   },
   {
-    "revision": "52604afd7d2202eea226",
-    "url": "/baucuatomca/static/css/main.e4abde2d.chunk.css"
+    "revision": "7fc0a80a8fb94744fa11",
+    "url": "/baucuatomca/static/css/main.c2d7b42b.chunk.css"
   },
   {
     "revision": "0f042acfeb56fe76508b",
     "url": "/baucuatomca/static/js/2.4525d79a.chunk.js"
   },
   {
-    "revision": "52604afd7d2202eea226",
+    "revision": "7fc0a80a8fb94744fa11",
     "url": "/baucuatomca/static/js/main.ae7c11fa.chunk.js"
   },
   {
