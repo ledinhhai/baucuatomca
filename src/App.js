@@ -17,6 +17,7 @@ import './styles.css';
 function PrivateRoute({ component: Component, authenticated, ...rest }) {
   return (
     <Route
+    basename={process.env.PUBLIC_URL}
       {...rest}
       render={props =>
         authenticated === true ? (
@@ -34,6 +35,7 @@ function PrivateRoute({ component: Component, authenticated, ...rest }) {
 function PublicRoute({ component: Component, authenticated, ...rest }) {
   return (
     <Route
+      basename={process.env.PUBLIC_URL}
       {...rest}
       render={props =>
         authenticated === false ? (
@@ -79,7 +81,7 @@ class App extends Component {
     ) : (
         <Router basename={process.env.PUBLIC_URL}>
           <Switch>
-            <Route exact path="/" component={Home} />
+            <Route exact path="/" component={Home}  basename={process.env.PUBLIC_URL}/>
             <PrivateRoute
               path="/chat"
               authenticated={this.state.authenticated}
