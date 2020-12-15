@@ -1,6 +1,6 @@
 {
   "files": {
-    "main.css": "/baucuatomca/static/css/main.a5878e26.chunk.css",
+    "main.css": "/baucuatomca/static/css/main.9f98112d.chunk.css",
     "main.js": "/baucuatomca/static/js/main.2da862e9.chunk.js",
     "main.js.map": "/baucuatomca/static/js/main.2da862e9.chunk.js.map",
     "runtime~main.js": "/baucuatomca/static/js/runtime~main.3ea2ebb9.js",
@@ -9,10 +9,10 @@
     "static/js/2.644f8513.chunk.js": "/baucuatomca/static/js/2.644f8513.chunk.js",
     "static/js/2.644f8513.chunk.js.map": "/baucuatomca/static/js/2.644f8513.chunk.js.map",
     "index.html": "/baucuatomca/index.html",
-    "precache-manifest.85500b1171f68e88c901963b18f6e43e.js": "/baucuatomca/precache-manifest.85500b1171f68e88c901963b18f6e43e.js",
+    "precache-manifest.29305ded660926aeb286a4c3529eb02e.js": "/baucuatomca/precache-manifest.29305ded660926aeb286a4c3529eb02e.js",
     "service-worker.js": "/baucuatomca/service-worker.js",
     "static/css/2.034d33df.chunk.css.map": "/baucuatomca/static/css/2.034d33df.chunk.css.map",
-    "static/css/main.a5878e26.chunk.css.map": "/baucuatomca/static/css/main.a5878e26.chunk.css.map",
+    "static/css/main.9f98112d.chunk.css.map": "/baucuatomca/static/css/main.9f98112d.chunk.css.map",
     "static/media/font-awesome.min.css": "/baucuatomca/static/media/fontawesome-webfont.fee66e71.woff"
   }
 }
