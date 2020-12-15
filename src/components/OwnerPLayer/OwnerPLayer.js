@@ -1,11 +1,7 @@
-// @flow
-
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
-import type { Dispatch } from '../../types';
-
-import './OwnerPLayer.scss';
+import '../PlayBox/PlayBox.scss';
 
 class OwnerPLayer extends Component{
   render() {
