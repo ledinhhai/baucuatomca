@@ -1,17 +1,37 @@
-import React from 'react';
-import PlayBox from '../PlayBox/PlayBox';
+// @flow
 
-class OwnerPLayer extends React.Component{
-  render(){
-      const {items, onClick} = this.props;
-      return items.map(function (item, i) {
-          return <PlayBox key={i} name={item.name} value={item.value} 
-              style={item.style} isActive={item.isActive}
-              onClick = {onClick}
-              users = {item.users}
-          />
-        });
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
+
+import type { Dispatch } from '../../types';
+
+import './OwnerPLayer.scss';
+
+class OwnerPLayer extends Component{
+  render() {
+    const {value, users, name} = this.props;
+    return (
+      <div className={`playBox col-xs-12 col-sm-4`}>
+          <div className={`playItem ${name}`}></div>
+          {users?users.map(item =>{
+            var userStyle ={
+              width: item.value,
+              height: item.value,
+              lineHeight: (item.value > 150 ? 150 : item.value)+"px",
+              backgroundColor: item.color
+            }
+            return <div key={item.uid} className="userSelect" style={userStyle}>
+              {item.uid.charAt(0)}
+            </div>
+          }):""}
+          <div className ="boxControl">
+          {/* <button type="button"><i className="fa fa-minus"></i></button> */}
+          <input disabled value={value}/>
+          {/* <button type="button"><i className="fa fa-plus"></i></button> */}
+          </div>
+      </div>
+    );
   }
 }
 
-export default OwnerPLayer
+export default connect()(OwnerPLayer);

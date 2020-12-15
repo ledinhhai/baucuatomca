@@ -14,27 +14,28 @@
     width:  calc(100vh - 150px);
     background-color: gray;
 }
-.snakeModal .boder.in{
+.snakeModal .boder.closing.in{
     animation: shake 0.5s;
     animation-iteration-count: infinite;
 }
-.snakeModal .boder.start .cover{
-    left: calc(50vw - 500px);
-}
-.snakeModal .boder.start.in .cover{
-    left: auto;
-}
+
+
 .snakeModal .boder .cover {
     border-radius: 50%;
     border: 0px;
-    margin: 10px auto;
-    height: calc(100vh - 180px);
-    width: calc(100vh - 180px);
-    background-color: gray;
-    z-index: 100;
     position: fixed;
     transition:left 2s;
-    left: 100vw;
+    transform: translate(-50%, 0);
+    background-color: gray;
+    height: calc(100vh - 180px);
+    width: calc(100vh - 180px);
+    
+}
+.snakeModal .boder.open .cover {
+    left: calc(100% + 30000px);
+}
+.snakeModal .boder.closing .cover{
+    left: 50%;
 }
 
 @keyframes shake {
@@ -61,21 +62,39 @@
 .snakeModal .item {
     width: 100px;
     height: 100px;
-    background-color: hotpink;
+    background-color: white;
+    background-size: cover;
     margin: 10px;
     display: inline-block;
+    background-image: url(/img/bg.png);
+}
+.snakeModal .item.Ga{
+    background-image: url(/img/Ga.svg);
+}
+.snakeModal .item.Bau{
+    background-image: url(/img/Bau.svg);
+}
+.snakeModal .item.Nai{
+    background-image: url(/img/Nai.svg);
+}
+.snakeModal .item.Tom{
+    background-image: url(/img/Tom.svg);
+}
+.snakeModal .item.Cua{
+    background-image: url(/img/Cua.svg);
+}
+.snakeModal .item.Ca{
+    background-image: url(/img/Ca.svg);
 }
 .snakeModal .cover .btnOpen {
     position: fixed;
     top: 50%;
     left: 50%;
     margin-top: -40px; /* Negative half of height. */
-    margin-left: -25px; /* Negative half of width. */
+    margin-left: -50px; /* Negative half of width. */
     width: 100px;
-    height: 50px;
-    line-height: 50px;
-    display: none;
-}
-.snakeModal .boder.start.in .btnOpen {
-    display: block;
+    height: 100px;
+    border-radius: 50%;
+    border: solid 5px green;
+    outline: none;
 }

@@ -52,6 +52,44 @@ body {
   color: white;
 }
 
+.updateScore {
+  animation: MoveUpDown 5s linear 1;
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  opacity: 0;
+  font-size: 30px;
+  color: black;
+}
+.updateScore.error {
+  color: red;
+}
+.updateScore.success {
+  color: greenyellow;
+}
+@keyframes MoveUpDown {
+  0% {
+    bottom: 60%;
+    opacity: 0;
+  }
+  50% {
+    bottom: 75%;
+    opacity: 0.5;
+  }
+  60% {
+    bottom: 85%;
+    opacity: 0.8;
+  }
+  80% {
+    bottom: 90%;
+    opacity: 1;
+  }
+  100% {
+    bottom: 100%;
+    opacity: 0;
+  }
+}
+
 @media screen and (max-width: 767px) {
   .form-control {
     width: 100%;

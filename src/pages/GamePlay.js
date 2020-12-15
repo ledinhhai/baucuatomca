@@ -4,9 +4,9 @@ import Footer from '../components/Footer';
 import { auth, intMessaging as messaging } from "../services/firebase";
 import RoomService from "../services/firestore";
 import DBService from "../services/firebaseDB";
-
 import OwnerPLayer from "../components/OwnerPLayer/OwnerPLayer";
 import SnakeModal from "../components/SnakeModal/SnakeModal";
+import PlayBox from "../components/PlayBox/PlayBox";
 
 import { db } from '../services/firebase';
 
@@ -21,61 +21,68 @@ export default class GamePlay extends Component {
       items: [
         {
           name: "Nai",
-          style: { backgroundPosition: '-28px -75px' },
-          value: 0,
-          isActive: true
+          value: 0
         },
         {
           name: "Bau",
-          style: { backgroundPosition: '-435px -75px' },
-          value: 0,
-          isActive: true
+          value: 0
         },
         {
           name: "Ga",
-          style: { backgroundPosition: '-845px -75px' },
-          value: 0,
-          isActive: true
+          value: 0
         },
         {
           name: "Ca",
-          style: { backgroundPosition: '-28px -385px' },
-          value: 0,
-          isActive: true
+          value: 0
         },
         {
           name: "Cua",
-          style: { backgroundPosition: '-435px -385px' },
-          value: 0,
-          isActive: true
+          value: 0
         },
         {
           name: "Tom",
-          style: { backgroundPosition: '-845px -385px' },
-          value: 0,
-          isActive: true
+          value: 0
         }
       ],
-      result: [],
-      bets: [],
+      result: [
+        {
+          name: "Bau",
+          value: 0
+        },
+        {
+          name: "Bau",
+          value: 0
+        },
+        {
+          name: "Bau",
+          value: 0
+        }
+      ],
+      bets: {},
       status: 0,
+      scores: 0,
+      scoresChange: 0,
+      gameCount: 0
     };
     this.shake = this.shake.bind(this);
     this.getData = this.getData.bind(this);
+    this.getRoomDetal = this.getRoomDetal.bind(this);
     this.onBetChange = this.onBetChange.bind(this);
     this.showSnakeModal = this.showSnakeModal.bind(this);
-
+    this.onResetGame = this.onResetGame.bind(this);
+    this.renderPlayBox = this.renderPlayBox.bind(this);
   }
 
   shake() {
-    const { roomId, items, bets, user } = this.state;
-    this.result = [this.randomItem(), this.randomItem(), this.randomItem()];
+    var { roomId, bets, user, result } = this.state;
     var users = {};
+    result = [this.randomItem(), this.randomItem(), this.randomItem()];
+
     Object.keys(bets).reduce((object, key) => {
       const item = bets[key];
       var coin = 0;
       Object.keys(item).reduce((object, key) => {
-        var count = this.countValue(this.result, key);
+        var count = this.countValue(result, key);
         if (count > 0) {
           coin += count * item[key];
         } else {
@@ -83,22 +90,16 @@ export default class GamePlay extends Component {
         }
         return object;
       }, {});
-      users[key]= coin;
+      users[key] = coin;
+      return object;
     }, {});
-    items.forEach(item => {
-      var count = this.countValue(this.result, item.name);
-      item.isActive = count > 0;
-    });
-    this.setState({
-      items: items
-    });
 
     RoomService.getById(roomId).then(data => {
       var room = data.data();
       users[user.uid] = 0;
 
       Object.keys(users).reduce((object, key) => {
-        if(key !== user.uid){
+        if (key !== user.uid) {
           users[user.uid] -= users[key];
           room.users[key] += users[key];
         }
@@ -109,8 +110,19 @@ export default class GamePlay extends Component {
     });
 
     db.ref(roomId).update({
-      status: 0,
-      bets:{}
+      status: 2,
+      bets: {},
+      result: result
+    });
+    setTimeout(
+      () => this.onResetGame(),
+      3000
+    );
+  }
+
+  onResetGame() {
+    db.ref(this.state.roomId).update({
+      status: 0
     });
   }
 
@@ -128,26 +140,35 @@ export default class GamePlay extends Component {
   }
 
   componentDidMount() {
-    const { roomId, user } = this.state;
-    RoomService.getById(roomId).then(data => {
-      var room = data.data();
-      if (room.uid === user.uid) {
-        this.setState({ isOwner: true });
-      } else {
-        // lần đầu vào room
-        if (room.users[user.uid] === undefined) {
-          room.users[user.uid] = 0; // cập nhập danh sách user của room
-          RoomService.update(roomId, room);
-        }
-      }
-    }).then(item => this.setState({ isLoading: false }));
-    DBService.writeChats(roomId, {
-      content: user.email + " đã vào phòng",
-      timestamp: Date.now(),
-      uid: user.uid
-    });
+    this.getRoomDetal();
     this.getData();
   }
+
+  getRoomDetal() {
+    const { roomId, user } = this.state;
+    RoomService.getAll().doc(roomId).onSnapshot(data => {
+      var { scoresChange, scores } = this.state;
+      var room = data.data();
+      // lần đầu vào room
+      if (room.users[user.uid] === undefined) {
+        room.users[user.uid] = 0; // cập nhập danh sách user của room
+        RoomService.update(roomId, room);
+      }
+
+      DBService.writeChats(roomId, {
+        content: user.email + " đã vào phòng",
+        timestamp: Date.now(),
+        uid: user.uid
+      });
+      scoresChange = room.users[user.uid] - scores;
+      this.setState({
+        scores: room.users[user.uid],
+        scoresChange: scoresChange,
+        isOwner: room.uid === user.uid
+      });
+    });
+  }
+
   componentWillUnmount() {
     const { roomId, user } = this.state;
     DBService.writeChats(roomId, {
@@ -158,19 +179,23 @@ export default class GamePlay extends Component {
   }
 
   getData() {
-    const refId = this.state.roomId;
-    db.ref(refId).on("value", snapshot => {
-      var bets = [];
+    var { roomId, status, result, bets, isOwner, gameCount } = this.state;
+    db.ref(roomId).on("value", snapshot => {
+      bets = {};
       snapshot.forEach(snap => {
         if (snap.key === "bets") {
           bets = snap.val();
         } else if (snap.key === "status") {
-          this.setState({ status: snap.val() || 0 });
+          status = snap.val();
+        } else if (snap.key === "result") {
+          result = snap.val();
         }
       });
       var { items, user } = this.state;
       items.forEach((item, key) => {
         var users = [];
+        item.value = 0;
+        item.users = users;
         Object.keys(bets).reduce((object, key) => {
           if (bets[key][item.name] !== undefined) {
             users.push({
@@ -179,16 +204,20 @@ export default class GamePlay extends Component {
               color: this.onRenderColor(key)
             });
           };
-          item.users = users;
-          if (key === user.uid) {
+
+          if (isOwner) {
+            item.value += bets[key][item.name] || 0;
+          } else if (key === user.uid) {
             item.value = bets[key][item.name] || 0;
           }
           return object;
         }, {});
-      })
-      this.setState({ bets: bets, items: items });
+      });
+
+      this.setState({ bets: bets, items: items, result: result, status: status, isLoading: false });
     });
   }
+
   showSnakeModal() {
     const refId = this.state.roomId;
     db.ref(refId).update({
@@ -216,8 +245,29 @@ export default class GamePlay extends Component {
     db.ref(roomId + "/bets/" + user.uid).set(newData);
   }
 
+  renderPlayBox(items) {
+    if (this.state.isOwner) {
+      return items.map(function (item, i) {
+        return <OwnerPLayer key={i} name={item.name} value={item.value}
+          style={item.style} isActive={item.isActive}
+          users={item.users}
+        />
+      });
+    } else {
+      const onClick = this.onBetChange;
+      return items.map(function (item, i) {
+        return <PlayBox key={i} name={item.name} value={item.value}
+          style={item.style} isActive={item.isActive}
+          users={item.users}
+          onClick={onClick}
+        />
+      });
+    }
+  }
+
   render() {
-    const { isLoading, status, isOwner } = this.state
+    const { isLoading, status, isOwner, result, items, scores, scoresChange, bets } = this.state;
+    console.log(bets);
     if (isLoading) {
       return <div>Is Loading</div>
     }
@@ -228,19 +278,22 @@ export default class GamePlay extends Component {
           <div className="jumbotron jumbotron-fluid py-5">
             <div className="container">
               <div className="row">
-                <div className="col-10">
-                  <OwnerPLayer items={this.state.items} result={this.result} onClick={this.onBetChange} />
+                <div className="col-sm-10">
+                  {this.renderPlayBox(items)}
                 </div>
-                <div className="col-2">
-                  {isOwner ? <button onClick={this.showSnakeModal}>Xúc</button> : ""}
-                  {/* <Bet items = {this.props.bets} onClick = {this.shake} result = {this.result}/> */}
+                <div className="col-sm-2">
+                  {isOwner && Object.keys(bets).length > 0 ? <button onClick={this.showSnakeModal}>Lắc</button> : ""}
+                  {scores}
                 </div>
               </div>
             </div>
           </div>
         </section>
         <Footer></Footer>
-        {status === 1 ? <SnakeModal isOwner={isOwner} onClick={this.shake}></SnakeModal> : ""}
+        {status !== 0? <SnakeModal isOwner={isOwner} onClick={this.shake}
+          onResetGame={this.onResetGame}
+          result={result} status={status}></SnakeModal> : ""}
+        {status === 2 ? <div className={`updateScore ${scoresChange < 0 ? "error" : scoresChange > 0 ? "success" : ""}`}>{scoresChange}</div> : ""}
       </div>
     )
   }

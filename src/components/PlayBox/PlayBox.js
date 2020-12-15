@@ -22,38 +22,27 @@ class PlayBox extends Component<Props, State> {
     event.preventDefault();
     
     let value = this.props.value - 10;
-    //this.setState({ value: value });
-    //this.props.dispatch(minusBet(this.props.name, 10));
     this.props.onClick(this.props.name, value);
   };
 
   handlePlus = (event: Event) => {
     event.preventDefault();
     let value = this.props.value + 10;
-    //this.setState({ value: value });
     this.props.onClick(this.props.name, value);
-    //this.props.dispatch(plusBet(this.props.name, 10));
   };
  
   render() {
-    let overlay;
-    const {isActive, style, value, users} = this.props;
-    if(!isActive){
-      overlay= <div className="overlay"></div>;
-    }
-    
+    const {value, users, name} = this.props;
     return (
-      <div className={`playBox`}>
-          {overlay}
-          <div className="playItem" style={style}></div>
+      <div className={`playBox col-xs-12 col-sm-4`}>
+          <div className={`playItem ${name}`}></div>
           {users?users.map(item =>{
             var userStyle ={
               width: item.value,
               height: item.value,
-              lineHeight: item.value+"px",
+              lineHeight: (item.value > 150 ? 150 : item.value)+"px",
               backgroundColor: item.color
             }
-            console.log(item.color);
             return <div key={item.uid} className="userSelect" style={userStyle}>
               {item.uid.charAt(0)}
             </div>
