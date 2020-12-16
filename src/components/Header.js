@@ -19,8 +19,8 @@ function Header() {
               <a href="/" className="nav-item nav-link mr-3" onClick={() => auth().signOut()}>Đăng xuất</a>
             </div>
             : <div className="navbar-nav">
-              <Link className="nav-item nav-link mr-3" to="/login">Sign In</Link>
-              <Link className="nav-item nav-link mr-3" to="/signup">Sign Up</Link>
+              <Link className="nav-item nav-link mr-3" to="/login">Đăng nhập</Link>
+              <Link className="nav-item nav-link mr-3" to="/signup">Đăng ký</Link>
             </div>}
         </div>
       </nav>

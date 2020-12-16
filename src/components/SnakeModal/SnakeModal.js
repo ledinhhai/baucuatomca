@@ -26,7 +26,7 @@ class SnakeModal extends React.Component {
         }
     }
     render() {
-        const { result , status, onClick, onResetGame} = this.props;
+        const { result, onClick} = this.props;
         return <div className="snakeModal">
             <div className={`boder ${this.state.className}`}>
             <div className="groupItem">

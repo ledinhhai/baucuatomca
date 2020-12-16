@@ -4,7 +4,6 @@ body {
     background-color: #fcfcfc;
 }
 
-.chat-area,
 .home {
     margin-top: 60px;
     position: relative;
@@ -17,9 +16,10 @@ body {
 }
 
 .chat-area {
-    padding: 20px;
+    padding: 0px;
     height: 400px;
     overflow-y: scroll;
+    font-size: 13px;
 }
 
 .chat-area .chat-bubble {

@@ -11,6 +11,7 @@ import PlayBox from "../components/PlayBox/PlayBox";
 import md5 from 'md5';
 
 import { db } from '../services/firebase';
+import { createExpressionWithTypeArguments } from 'typescript';
 
 export default class GamePlay extends Component {
   constructor(props) {
@@ -64,7 +65,8 @@ export default class GamePlay extends Component {
       status: 0,
       scores: 0,
       scoresChange: 0,
-      gameCount: 0
+      gameCount: 0,
+      chats: []
     };
     this.shake = this.shake.bind(this);
     this.getData = this.getData.bind(this);
@@ -118,13 +120,19 @@ export default class GamePlay extends Component {
     });
     setTimeout(
       () => this.onResetGame(),
-      3000
+      5000
     );
   }
 
   onResetGame() {
-    db.ref(this.state.roomId).update({
-      status: 0
+    var { roomId, gameCount, result } = this.state;
+    db.ref(roomId).update({
+      status: 0,
+      game: gameCount + 1
+    });
+    db.ref(roomId + "/list/" + roomId + gameCount).set({
+      content: `Game ${gameCount}: ${result.map(item => item.name)} `,
+      timestamp: Date.now()
     });
   }
 
@@ -142,6 +150,14 @@ export default class GamePlay extends Component {
   }
 
   componentDidMount() {
+    const { roomId, user } = this.state;
+    db.ref(roomId + "/list/" + user.uid).set({
+      content: user.displayName + " đã vào phòng",
+      timestamp: Date.now(),
+      name: user.displayName,
+      avatar: this.renderphotoURL(user.email),
+      uid: user.uid
+    });
     this.getRoomDetal();
     this.getData();
   }
@@ -156,14 +172,6 @@ export default class GamePlay extends Component {
         room.users[user.uid] = 0; // cập nhập danh sách user của room
         RoomService.update(roomId, room);
       }
-
-      DBService.writeChats(roomId, {
-        content: user.displayName + " đã vào phòng",
-        timestamp: Date.now(),
-        name: user.displayName,
-        avatar: this.renderphotoURL(user.email),
-        uid: user.uid
-      });
       scoresChange = room.users[user.uid] - scores;
       this.setState({
         scores: room.users[user.uid],
@@ -175,8 +183,8 @@ export default class GamePlay extends Component {
 
   componentWillUnmount() {
     const { roomId, user } = this.state;
-    DBService.writeChats(roomId, {
-      content: user.email + " đã thoát khỏi phòng",
+    db.ref(roomId + "/list/" + user.uid).set({
+      content: user.displayName + " đã thoát khỏi phòng",
       timestamp: Date.now(),
       name: user.displayName,
       avatar: this.renderphotoURL(user.email),
@@ -185,19 +193,27 @@ export default class GamePlay extends Component {
   }
 
   getData() {
-    var { roomId, status, result, bets, isOwner, gameCount } = this.state;
+    var { roomId, status, result, bets, chats, gameCount } = this.state;
     db.ref(roomId).on("value", snapshot => {
       bets = {};
       snapshot.forEach(snap => {
-        if (snap.key === "bets") {
+        if (snap.key === "game") {
+          gameCount = snap.val() || 0;
+        } else if (snap.key === "bets") {
           bets = snap.val();
         } else if (snap.key === "status") {
           status = snap.val();
         } else if (snap.key === "result") {
           result = snap.val();
+        } else if (snap.key === "list") {
+          var data = snap.val();
+          chats = [];
+          Object.keys(data).map(key => {
+            data[key] && chats.push(data[key]);
+          })
         }
       });
-      var { items, user } = this.state;
+      var { items, user, isOwner } = this.state;
       items.forEach((item, key) => {
         var users = [];
         item.value = 0;
@@ -219,14 +235,22 @@ export default class GamePlay extends Component {
           return object;
         }, {});
       });
-
-      this.setState({ bets: bets, items: items, result: result, status: status, isLoading: false });
+      this.setState({
+        bets: bets,
+        gameCount: gameCount,
+        items: items,
+        result: result,
+        status: status,
+        isLoading: false,
+        chats: chats.sort((a, b) => a.timestamp < b.timestamp ? -1 : 1)
+      });
     });
   }
 
   renderphotoURL(email) {
     return "http://www.gravatar.com/avatar/" + md5(email) + ".jpg?s=300";
   }
+
   showSnakeModal() {
     const refId = this.state.roomId;
     db.ref(refId).update({
@@ -239,9 +263,13 @@ export default class GamePlay extends Component {
     return "#" + (number.toString(16).substring(0, 6));
   }
 
+  formatTime(timestamp) {
+    const d = new Date(timestamp);
+    const time = `${d.getDate()}/${(d.getMonth() + 1)}/${d.getFullYear()} ${d.getHours()}:${d.getMinutes()}}`;
+    return time;
+  }
   onBetChange(name, value) {
-    const { bets } = this.state;
-    const { roomId, user } = this.state;
+    const { roomId, user, bets, gameCount } = this.state;
     var data = bets[user.uid] || [];
 
     data[name] = value;
@@ -251,6 +279,13 @@ export default class GamePlay extends Component {
       }
       return object
     }, {});
+
+    db.ref(roomId + "/list/" + user.uid + gameCount).set({
+      avatar: this.renderphotoURL(user.email),
+      content: `${user.displayName} đã đặt cược ${Object.keys(newData).map(key => key)}`,
+      timestamp: Date.now(),
+      uid: user.uid
+    });
     db.ref(roomId + "/bets/" + user.uid).set(newData);
   }
 
@@ -275,7 +310,7 @@ export default class GamePlay extends Component {
   }
 
   render() {
-    const { isLoading, status, isOwner, result, items, scores, scoresChange, bets } = this.state;
+    const { isLoading, status, isOwner, result, items, scores, scoresChange, bets, chats } = this.state;
     if (isLoading) {
       return <div>Is Loading</div>
     }
@@ -284,14 +319,21 @@ export default class GamePlay extends Component {
         <Header></Header>
         <section>
           <div className="jumbotron jumbotron-fluid py-5">
-            <div className="container">
+            <div className="container-fluid">
               <div className="row">
                 <div className="col-sm-10">
                   {this.renderPlayBox(items)}
                 </div>
                 <div className="col-sm-2">
-                  {isOwner && Object.keys(bets).length > 0 ? <button onClick={this.showSnakeModal}>Lắc</button> : ""}
-                  {scores}
+                  <div className="chat-area" ref={this.myRef}>
+                    {chats.map(chat => {
+                      return <p key={chat.timestamp} className={"chat-bubble " + (this.state.user.uid === chat.uid ? "current-user" : "")}>
+                        {chat.content}
+                      </p>
+                    })}
+                  </div>
+                  {isOwner && Object.keys(bets).length > 0 ? <button className="btn btn-primary mt-5" onClick={this.showSnakeModal}>Lắc</button> : ""}
+                  <p>Điểm số: {scores}</p>
                 </div>
               </div>
             </div>
