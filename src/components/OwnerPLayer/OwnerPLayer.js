@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
-import '../PlayBox/PlayBox.scss';
+import '../PlayBox/Playbox.scss';
 
 class OwnerPLayer extends Component{
   render() {

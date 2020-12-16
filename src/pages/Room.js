@@ -75,7 +75,8 @@ export default class RoomPage extends Component {
           });
       }
   render() {
-    const {rooms, name} = this.state;
+    const {rooms, name, user} = this.state;
+    console.log(user);
     return (
       <div className="home">
         <Header></Header>

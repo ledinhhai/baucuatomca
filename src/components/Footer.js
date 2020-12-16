@@ -2,9 +2,9 @@ import React from 'react';
 
 function Footer() {
   return (
-    <footer className="pt-5">
+    <footer>
       <div className="container text-center">
-        <p>&copy; Chatty 2020.</p>
+        <p><a href="http://ledinhhai.github.io/" target="">ledinhhai.github.io</a>&copy;2021.</p>
       </div>
     </footer>
   )

@@ -156,9 +156,10 @@ export default class GamePlay extends Component {
       }
 
       DBService.writeChats(roomId, {
-        content: user.email + " đã vào phòng",
+        content: user.displayName + " đã vào phòng",
         timestamp: Date.now(),
-        uid: user.uid
+        name: user.displayName,
+        avatar: user.photoURL
       });
       scoresChange = room.users[user.uid] - scores;
       this.setState({
@@ -267,7 +268,6 @@ export default class GamePlay extends Component {
 
   render() {
     const { isLoading, status, isOwner, result, items, scores, scoresChange, bets } = this.state;
-    console.log(bets);
     if (isLoading) {
       return <div>Is Loading</div>
     }
