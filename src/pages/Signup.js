@@ -10,11 +10,11 @@ export default class SignUp extends Component {
       error: null,
       email: '',
       password: '',
+      name:''
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.googleSignIn = this.googleSignIn.bind(this);
-    this.githubSignIn = this.githubSignIn.bind(this);
   }
 
   handleChange(event) {
@@ -26,10 +26,22 @@ export default class SignUp extends Component {
   async handleSubmit(event) {
     event.preventDefault();
     this.setState({ error: '' });
+    if( this.state.name.length === 0){
+      this.setState({ error: "Vui lòng chọn biệt danh" });
+      return;
+    }
     try {
-      await signup(this.state.email, this.state.password);
+      await signup(this.state.email, this.state.password, this.state.name);
     } catch (error) {
-      this.setState({ error: error.message });
+      console.log(error);
+      if(error.code ==="auth/email-already-in-use"){
+        this.setState({ error: "Email đã được sử dụng vui lòng sử dụng email khác" });
+      }else if(error.code === "auth/weak-password"){
+        this.setState({ error: "Mật khẩu phải có ít nhất 6 ký tự" });
+      }else {
+        this.setState({ error: "Đã có lỗi vui lòng liên hệ admin để hỗ trợ" });
+      }
+      
     }
   }
 
@@ -41,43 +53,38 @@ export default class SignUp extends Component {
     }
   }
 
-  async githubSignIn() {
-    try {
-      await signInWithGitHub();
-    } catch (error) {
-      console.log(error)
-      this.setState({ error: error.message });
-    }
-  }
-
   render() {
     return (
       <div className="container">
-        <form className="mt-5 py-5 px-5" onSubmit={this.handleSubmit}>
-          <h1>
-            Sign Up to
-          <Link className="title ml-2" to="/">Chatty</Link>
+        <form
+          className="frmLogin"
+          autoComplete="off"
+          onSubmit={this.handleSubmit}
+        >
+          <h1 className="mb-5">
+            Đăng ký tài khoản
+            {/* <Link className="title ml-2" to="/">
+              Chatty
+            </Link> */}
           </h1>
-          <p className="lead">Fill in the form below to create an account.</p>
+          <div className="form-group">
+            <input className="form-control" placeholder="Biệt danh" name="name" onChange={this.handleChange} value={this.state.name} type="text"></input>
+          </div>
           <div className="form-group">
             <input className="form-control" placeholder="Email" name="email" type="email" onChange={this.handleChange} value={this.state.email}></input>
           </div>
           <div className="form-group">
-            <input className="form-control" placeholder="Password" name="password" onChange={this.handleChange} value={this.state.password} type="password"></input>
+            <input className="form-control" placeholder="Mật khẩu" name="password" onChange={this.handleChange} value={this.state.password} type="password"></input>
           </div>
           <div className="form-group">
             {this.state.error ? <p className="text-danger">{this.state.error}</p> : null}
-            <button className="btn btn-primary px-5" type="submit">Sign up</button>
+            <button className="btn btn-primary px-5" type="submit">Đăng ký</button>
+            <p className="line"><span>Hoặc</span></p>
+            <button className="btn btn-danger" type="button" onClick={this.googleSignIn}>
+              Đăng ký bằng Google
+          </button>
           </div>
-          <p>You can also sign up with any of these services</p>
-          <button className="btn btn-danger mr-2" type="button" onClick={this.googleSignIn}>
-            Sign up with Google
-          </button>
-          <button className="btn btn-secondary" type="button" onClick={this.githubSignIn}>
-            Sign up with GitHub
-          </button>
-          <hr></hr>
-          <p>Already have an account? <Link to="/login">Login</Link></p>
+          <p>Nếu bạn đã có tài khoản? <Link to="/login">Đăng nhập</Link></p>
         </form>
       </div>
     )

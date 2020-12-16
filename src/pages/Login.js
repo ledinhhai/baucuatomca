@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
-import { signInWithFB } from "../helpers/auth";
+import { signin, signInWithGoogle, signInWithGitHub } from "../helpers/auth";
 
 export default class Login extends Component {
   constructor() {
@@ -10,12 +10,30 @@ export default class Login extends Component {
       email: "",
       password: ""
     };
-    this.fbSignIn = this.fbSignIn.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.googleSignIn = this.googleSignIn.bind(this);
   }
 
-  async fbSignIn(){
+  handleChange(event) {
+    this.setState({
+      [event.target.name]: event.target.value
+    });
+  }
+
+  async handleSubmit(event) {
+    event.preventDefault();
+    this.setState({ error: "" });
     try {
-      await signInWithFB();
+      await signin(this.state.email, this.state.password);
+    } catch (error) {
+      this.setState({ error: error.message });
+    }
+  }
+
+  async googleSignIn() {
+    try {
+      await signInWithGoogle();
     } catch (error) {
       this.setState({ error: error.message });
     }
@@ -24,9 +42,52 @@ export default class Login extends Component {
   render() {
     return (
       <div className="container">
-        <button className="btn btn-primary" type="button" onClick={this.fbSignIn}>
-            Sign in with Facebook
-        </button>
+        <form
+          className="frmLogin"
+          autoComplete="off"
+          onSubmit={this.handleSubmit}
+        >
+          <h1 className="mb-5">
+            Đăng nhập
+            {/* <Link className="title ml-2" to="/">
+              Chatty
+            </Link> */}
+          </h1>
+          <div className="form-group">
+            <input
+              className="form-control"
+              placeholder="Email"
+              name="email"
+              type="email"
+              onChange={this.handleChange}
+              value={this.state.email}
+            />
+          </div>
+          <div className="form-group">
+            <input
+              className="form-control"
+              placeholder="Mật khẩu"
+              name="password"
+              onChange={this.handleChange}
+              value={this.state.password}
+              type="password"
+            />
+          </div>
+          <div className="form-group">
+            {this.state.error ? (
+              <p className="text-danger">{this.state.error}</p>
+            ) : null}
+            <button className="btn btn-primary px-5" type="submit">Đăng nhập</button>
+            <p className="line"><span>Hoặc</span></p>
+            <button className="btn btn-danger" type="button" onClick={this.googleSignIn}>
+              Đăng nhập bằng Google
+          </button>
+          </div>
+          <hr /><p>
+            Nếu chưa có tài khoản? Bạn có thể <Link to="/signup">Đăng ký</Link>
+          </p>
+        </form>
+
       </div>
     );
   }

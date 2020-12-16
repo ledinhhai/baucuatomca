@@ -8,6 +8,8 @@ import OwnerPLayer from "../components/OwnerPLayer/OwnerPLayer";
 import SnakeModal from "../components/SnakeModal/SnakeModal";
 import PlayBox from "../components/PlayBox/PlayBox";
 
+import md5 from 'md5';
+
 import { db } from '../services/firebase';
 
 export default class GamePlay extends Component {
@@ -159,7 +161,8 @@ export default class GamePlay extends Component {
         content: user.displayName + " đã vào phòng",
         timestamp: Date.now(),
         name: user.displayName,
-        avatar: user.photoURL
+        avatar: this.renderphotoURL(user.email),
+        uid: user.uid
       });
       scoresChange = room.users[user.uid] - scores;
       this.setState({
@@ -175,6 +178,8 @@ export default class GamePlay extends Component {
     DBService.writeChats(roomId, {
       content: user.email + " đã thoát khỏi phòng",
       timestamp: Date.now(),
+      name: user.displayName,
+      avatar: this.renderphotoURL(user.email),
       uid: user.uid
     });
   }
@@ -219,6 +224,9 @@ export default class GamePlay extends Component {
     });
   }
 
+  renderphotoURL(email) {
+    return "http://www.gravatar.com/avatar/" + md5(email) + ".jpg?s=300";
+  }
   showSnakeModal() {
     const refId = this.state.roomId;
     db.ref(refId).update({
@@ -290,7 +298,7 @@ export default class GamePlay extends Component {
           </div>
         </section>
         <Footer></Footer>
-        {status !== 0? <SnakeModal isOwner={isOwner} onClick={this.shake}
+        {status !== 0 ? <SnakeModal isOwner={isOwner} onClick={this.shake}
           onResetGame={this.onResetGame}
           result={result} status={status}></SnakeModal> : ""}
         {status === 2 ? <div className={`updateScore ${scoresChange < 0 ? "error" : scoresChange > 0 ? "success" : ""}`}>{scoresChange}</div> : ""}

@@ -16,7 +16,7 @@ function Header() {
           {auth().currentUser
             ? <div className="navbar-nav">
               <Link className="nav-item nav-link mr-3" to="/room">Phòng chơi</Link>
-              <a href="javascript:;" className="nav-item nav-link mr-3" onClick={() => auth().signOut()}>Đăng xuất</a>
+              <a href="/" className="nav-item nav-link mr-3" onClick={() => auth().signOut()}>Đăng xuất</a>
             </div>
             : <div className="navbar-nav">
               <Link className="nav-item nav-link mr-3" to="/login">Sign In</Link>
