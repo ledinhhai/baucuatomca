@@ -3,7 +3,6 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { auth, intMessaging as messaging } from "../services/firebase";
 import RoomService from "../services/firestore";
-import DBService from "../services/firebaseDB";
 import OwnerPLayer from "../components/OwnerPLayer/OwnerPLayer";
 import SnakeModal from "../components/SnakeModal/SnakeModal";
 import PlayBox from "../components/PlayBox/PlayBox";
@@ -11,7 +10,7 @@ import PlayBox from "../components/PlayBox/PlayBox";
 import md5 from 'md5';
 
 import { db } from '../services/firebase';
-import { createExpressionWithTypeArguments } from 'typescript';
+
 
 export default class GamePlay extends Component {
   constructor(props) {
@@ -131,7 +130,7 @@ export default class GamePlay extends Component {
       game: gameCount + 1
     });
     db.ref(roomId + "/list/" + roomId + gameCount).set({
-      content: `Game ${gameCount}: ${result.map(item => item.name)} `,
+      content: `Game ${(gameCount + 1)}: ${result.map(item => item.name)} `,
       timestamp: Date.now()
     });
   }
@@ -150,6 +149,7 @@ export default class GamePlay extends Component {
   }
 
   componentDidMount() {
+    localStorage.removeItem("Redirect");
     const { roomId, user } = this.state;
     db.ref(roomId + "/list/" + user.uid).set({
       content: user.displayName + " đã vào phòng",
@@ -167,6 +167,9 @@ export default class GamePlay extends Component {
     RoomService.getAll().doc(roomId).onSnapshot(data => {
       var { scoresChange, scores } = this.state;
       var room = data.data();
+      if (room === undefined) {
+        return this.props.history.push('/');
+      }
       // lần đầu vào room
       if (room.users[user.uid] === undefined) {
         room.users[user.uid] = 0; // cập nhập danh sách user của room
@@ -245,6 +248,9 @@ export default class GamePlay extends Component {
         chats: chats.sort((a, b) => a.timestamp < b.timestamp ? -1 : 1)
       });
     });
+  }
+  componentDidUpdate() {
+    this.chatArea && this.chatArea.scrollBy(0, this.chatArea.scrollHeight);
   }
 
   renderphotoURL(email) {
@@ -325,7 +331,7 @@ export default class GamePlay extends Component {
                   {this.renderPlayBox(items)}
                 </div>
                 <div className="col-sm-2">
-                  <div className="chat-area" ref={this.myRef}>
+                  <div className="chat-area" ref={(input) => { this.chatArea = input; }} >
                     {chats.map(chat => {
                       return <p key={chat.timestamp} className={"chat-bubble " + (this.state.user.uid === chat.uid ? "current-user" : "")}>
                         {chat.content}

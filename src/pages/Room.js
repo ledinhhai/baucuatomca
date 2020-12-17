@@ -57,6 +57,7 @@ export default class RoomPage extends Component {
   async handleSubmit(event) {
     event.preventDefault();
     if (this.state.name.length === 0) {
+      this.roomName.focus();
       return;
     }
     let data = {
@@ -77,7 +78,7 @@ export default class RoomPage extends Component {
       });
   }
   render() {
-    const { rooms, name, user } = this.state;
+    const { rooms, name } = this.state;
     return (
       <div className="home">
         <Header></Header>
@@ -86,7 +87,9 @@ export default class RoomPage extends Component {
             <div className="col-12">
               <h1 className="float-left">Danh sách phòng</h1>
               <form onSubmit={this.handleSubmit} className="form-inline float-right">
-                <input className="form-control" placeholder="Nhập tên phòng" value={name} onChange={this.onChangeName} />
+                <input className="form-control"
+                  ref={(input) => { this.roomName = input; }} 
+                  placeholder="Nhập tên phòng" value={name} onChange={this.onChangeName} />
                 <button type="submit" className="btn btn-primary ml-5">Tạo phòng mới</button>
               </form>
             </div>
@@ -96,8 +99,8 @@ export default class RoomPage extends Component {
               console.log();
               return <li key={i} className="list-group-item">
                 <Link className="" to={`/game/${room.id}`}>
-                  {room.name.length > 0? room.name :"Chưa đặt tên"}
-                  </Link> - 
+                  {room.name.length > 0 ? room.name : "Chưa đặt tên"}
+                </Link> -
                   <span className="small">{Object.keys(room.users).length ?? 0} người chơi</span>
               </li>;
             })}

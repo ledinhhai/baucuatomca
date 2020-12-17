@@ -38,6 +38,11 @@ export default class Login extends Component {
       this.setState({ error: error.message });
     }
   }
+  componentDidMount(){
+    if(this.props.history.location.state != undefined){
+      localStorage.setItem("Redirect", this.props.history.location.state["from"]["pathname"])
+    }
+  }
 
   render() {
     return (
