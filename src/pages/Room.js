@@ -11,6 +11,7 @@ export default class RoomPage extends Component {
     this.onDataChange = this.onDataChange.bind(this);
     this.onChangeName = this.onChangeName.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.removeRoom = this.removeRoom.bind(this);
 
     this.state = {
       rooms: [],
@@ -38,6 +39,7 @@ export default class RoomPage extends Component {
       if (data && (data.uid === uid || data.users[uid])) {
         rooms.push({
           id: id,
+          uid: data.uid,
           name: data.name,
           users: data.users
         });
@@ -54,18 +56,25 @@ export default class RoomPage extends Component {
       name: e.target.value,
     });
   }
+  removeRoom(roomId) {
+    RoomService.delete(roomId);
+  }
   async handleSubmit(event) {
     event.preventDefault();
-    if (this.state.name.length === 0) {
+    var { name, user } = this.state;
+    if (name.length === 0) {
       this.roomName.focus();
       return;
     }
     let data = {
-      uid: this.state.user.uid,
-      name: this.state.name,
+      uid: user.uid,
+      name: name,
       users: {}
     };
-    data.users[this.state.user.uid] = 0;
+    data.users[`${user.displayName.charAt(0)}${user.uid}`] = {
+      name: user.displayName,
+      scores: 0
+    };
 
     RoomService.create(data)
       .then(() => {
@@ -78,7 +87,8 @@ export default class RoomPage extends Component {
       });
   }
   render() {
-    const { rooms, name } = this.state;
+    const { rooms, name, user } = this.state;
+    const removeRoom = this.removeRoom;
     return (
       <div className="home">
         <Header></Header>
@@ -88,20 +98,26 @@ export default class RoomPage extends Component {
               <h1 className="float-left">Danh sách phòng</h1>
               <form onSubmit={this.handleSubmit} className="form-inline float-right">
                 <input className="form-control"
-                  ref={(input) => { this.roomName = input; }} 
+                  ref={(input) => { this.roomName = input; }}
                   placeholder="Nhập tên phòng" value={name} onChange={this.onChangeName} />
                 <button type="submit" className="btn btn-primary ml-5">Tạo phòng mới</button>
               </form>
             </div>
           </div>
-          <ul className="list-group mt-5 mb-5">
+          <ul className="list-group mt-5 mb-5 list-room">
             {rooms.map(function (room, i) {
-              console.log();
               return <li key={i} className="list-group-item">
                 <Link className="" to={`/game/${room.id}`}>
                   {room.name.length > 0 ? room.name : "Chưa đặt tên"}
-                </Link> -
-                  <span className="small">{Object.keys(room.users).length ?? 0} người chơi</span>
+                </Link>
+                <span className="small ml-5">{Object.keys(room.users).length ?? 0} người chơi</span>
+                <span className="ml-5">Điểm số: {room.users[user.uid]}</span>
+                {
+                  room.uid === user.uid ?
+                    <button className="btn btn-danger float-right"
+                      onClick={() => { if (window.confirm('Delete the item?')) { removeRoom(room.id) }; }}>
+                      <i className="fa fa-trash  "></i></button> : ""
+                }
               </li>;
             })}
           </ul>

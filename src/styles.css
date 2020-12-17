@@ -59,6 +59,10 @@ body {
     color: greenyellow;
 }
 
+.list-room li {
+    line-height: 35px;
+}
+
 @keyframes MoveUpDown {
     0% {
         bottom: 60%;

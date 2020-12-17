@@ -44,7 +44,7 @@ class PlayBox extends Component<Props, State> {
               backgroundColor: item.color
             }
             return <div key={item.uid} className="userSelect" style={userStyle}>
-              {item.uid.charAt(0)}
+              {item.name}
             </div>
           }):""}
           <div className ="boxControl">

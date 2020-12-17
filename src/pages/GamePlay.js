@@ -74,17 +74,19 @@ export default class GamePlay extends Component {
     this.showSnakeModal = this.showSnakeModal.bind(this);
     this.onResetGame = this.onResetGame.bind(this);
     this.renderPlayBox = this.renderPlayBox.bind(this);
+
+    this.unsubscribe = undefined;
   }
 
   shake() {
     var { roomId, bets, user, result } = this.state;
-    var users = {};
+    var scores = {};
     result = [this.randomItem(), this.randomItem(), this.randomItem()];
 
-    Object.keys(bets).reduce((object, key) => {
-      const item = bets[key];
+    Object.keys(bets).reduce((object, userId) => {
+      const item = bets[userId];
       var coin = 0;
-      Object.keys(item).reduce((object, key) => {
+      Object.keys(item).reduce((object, key) => { // key is Bau Cua Tom Ca...
         var count = this.countValue(result, key);
         if (count > 0) {
           coin += count * item[key];
@@ -93,22 +95,22 @@ export default class GamePlay extends Component {
         }
         return object;
       }, {});
-      users[key] = coin;
+      scores[userId] = coin;
       return object;
     }, {});
-
+    
     RoomService.getById(roomId).then(data => {
       var room = data.data();
-      users[user.uid] = 0;
-
-      Object.keys(users).reduce((object, key) => {
-        if (key !== user.uid) {
-          users[user.uid] -= users[key];
-          room.users[key] += users[key];
+      var key =`${user.displayName.charAt(0)}${user.uid}`;
+      scores[key] = 0; // reset diem chu phong
+      Object.keys(scores).reduce((object, userId) => {
+        if (userId !== key) {// không phải là chủ phòng
+          scores[key] -= scores[userId]; // điểm của chủ phòng bằng hiện tại trừ cho điểm player 
+          room.users[userId]["scores"] += scores[userId]; // Update điểm của player 
         }
         return object;
       }, {});
-      room.users[user.uid] += users[user.uid];
+      room.users[key]["scores"] += scores[key];
       RoomService.update(roomId, room);
     });
 
@@ -158,30 +160,32 @@ export default class GamePlay extends Component {
       avatar: this.renderphotoURL(user.email),
       uid: user.uid
     });
-    this.getRoomDetal();
+    this.unsubscribe = RoomService.getAll().doc(roomId).onSnapshot(this.getRoomDetal);
     this.getData();
   }
 
-  getRoomDetal() {
-    const { roomId, user } = this.state;
-    RoomService.getAll().doc(roomId).onSnapshot(data => {
-      var { scoresChange, scores } = this.state;
+  getRoomDetal(data) {
+      var { scoresChange, scores, user, roomId } = this.state;
       var room = data.data();
       if (room === undefined) {
         return this.props.history.push('/');
       }
+      var key =`${user.displayName.charAt(0)}${user.uid}`;
       // lần đầu vào room
-      if (room.users[user.uid] === undefined) {
-        room.users[user.uid] = 0; // cập nhập danh sách user của room
+      if (room.users[key] === undefined) {
+        room.users[key] = {
+          name: user.displayName,
+          scores: 0
+        }; // cập nhập danh sách user của room
         RoomService.update(roomId, room);
       }
-      scoresChange = room.users[user.uid] - scores;
+      scoresChange = room.users[key].scores - scores;
       this.setState({
-        scores: room.users[user.uid],
+        scores: room.users[key].scores,
         scoresChange: scoresChange,
-        isOwner: room.uid === user.uid
+        isOwner: room.uid === user.uid,
+        users: room.users
       });
-    });
   }
 
   componentWillUnmount() {
@@ -193,6 +197,8 @@ export default class GamePlay extends Component {
       avatar: this.renderphotoURL(user.email),
       uid: user.uid
     });
+    this.unsubscribe();
+    db.ref(roomId).off();
   }
 
   getData() {
@@ -225,6 +231,7 @@ export default class GamePlay extends Component {
           if (bets[key][item.name] !== undefined) {
             users.push({
               uid: key,
+              name: key.charAt(0),
               value: bets[key][item.name] || 0,
               color: this.onRenderColor(key)
             });
@@ -232,7 +239,7 @@ export default class GamePlay extends Component {
 
           if (isOwner) {
             item.value += bets[key][item.name] || 0;
-          } else if (key === user.uid) {
+          } else if (key === `${user.displayName.charAt(0)}${user.uid}`) {
             item.value = bets[key][item.name] || 0;
           }
           return object;
@@ -276,8 +283,8 @@ export default class GamePlay extends Component {
   }
   onBetChange(name, value) {
     const { roomId, user, bets, gameCount } = this.state;
-    var data = bets[user.uid] || [];
-
+    var data = bets[`${user.displayName.charAt(0)}${user.uid}`] || [];
+    console.log(data);
     data[name] = value;
     const newData = Object.keys(data).reduce((object, key) => {
       if (data[key] > 0) {
@@ -285,14 +292,14 @@ export default class GamePlay extends Component {
       }
       return object
     }, {});
-
-    db.ref(roomId + "/list/" + user.uid + gameCount).set({
+    console.log(bets);
+    db.ref(`${roomId}/list/${user.uid}${gameCount}`).set({
       avatar: this.renderphotoURL(user.email),
       content: `${user.displayName} đã đặt cược ${Object.keys(newData).map(key => key)}`,
       timestamp: Date.now(),
       uid: user.uid
     });
-    db.ref(roomId + "/bets/" + user.uid).set(newData);
+    db.ref(`${roomId}/bets/${user.displayName.charAt(0)}${user.uid}`).set(newData);
   }
 
   renderPlayBox(items) {
@@ -316,7 +323,7 @@ export default class GamePlay extends Component {
   }
 
   render() {
-    const { isLoading, status, isOwner, result, items, scores, scoresChange, bets, chats } = this.state;
+    const { isLoading, status, isOwner, result, items, scores, scoresChange, bets, chats, users, user } = this.state;
     if (isLoading) {
       return <div>Is Loading</div>
     }
@@ -340,6 +347,14 @@ export default class GamePlay extends Component {
                   </div>
                   {isOwner && Object.keys(bets).length > 0 ? <button className="btn btn-primary mt-5" onClick={this.showSnakeModal}>Lắc</button> : ""}
                   <p>Điểm số: {scores}</p>
+                  <ul>
+                    {isOwner && Object.keys(users).map(item =>{
+                      
+                      if(item !== `${user.displayName.charAt(0)}${user.uid}`){
+                        return <li key={item}>{users[item].name}: {users[item].scores}</li>
+                      }
+                    })}
+                  </ul>
                 </div>
               </div>
             </div>

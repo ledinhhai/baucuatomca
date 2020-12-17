@@ -42,7 +42,7 @@ function PublicRoute({ component: Component, authenticated, ...rest }) {
         authenticated === false ? (
           <Component {...props} />
         ) : (
-          <Redirect to={props.location.state && props.location.state.from ? props.location.state.from.pathname:localStorage.getItem("Redirect")??"/"} />
+          <Redirect to={props.location.state && props.location.state.from ? props.location.state.from.pathname:localStorage.getItem("Redirect")??"/baucuatomca/"} />
           )
       }
     />
